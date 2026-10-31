@@ -5,7 +5,7 @@ potential stock shortages under hypothetical demand and inventory scenarios.
 
 [Open the live dashboard](https://souha-retail-demand-simulator.streamlit.app/)
 
-[Explore the research notebook](notebooks/retail_demand_simulator.ipynb)
+[Explore the research notebook](/retail_demand_simulator.ipynb)
 
 ## Research question
 
