@@ -254,9 +254,12 @@ dashboard, not the full training environment.
 ```text
 retail-demand-simulator/
 ├── app.py
+├── train.py
 ├── requirements.txt
 ├── requirements-dev.txt
+├── requirements-training.txt
 ├── README.md
+├── .gitignore
 ├── retail_demand_simulator.ipynb
 ├── data/
 │   ├── README.md
@@ -283,7 +286,8 @@ retail-demand-simulator/
 
 ## Future work
 
-- Separate training and cleaning into reusable scripts.
+- Add unit tests for the standalone cleaning and feature-engineering functions,
+including missing fields, reversal mismatches, and chronological boundary cases.
 - Expand automated tests to cover the training pipeline, invalid inputs,
 and additional interface behavior.
 - Introduce product-specific inventory inputs.
@@ -325,3 +329,106 @@ The current test suite passed all eight cases in the development environment.
 These tests validate dashboard behavior, not forecasting accuracy.
 They do not constitute a comprehensive security, accessibility, or browser-compatibility audit.
 Forecast accuracy is reported separately using the chronological evaluation.
+
+## Reproduce the selected training pipeline
+
+The standalone `train.py` script reproduces the selected workflow without
+requiring an existing notebook session.
+
+It performs:
+- Workbook loading and column standardization.
+- Documented transaction cleaning.
+- Verification and exclusion of the inspected same-day reversed order.
+- Training-period-only product selection.
+- Daily calendar construction.
+- Past-only lag and rolling-mean feature engineering.
+- Training of the selected absolute-error Random Forest.
+- Validation/test evaluation and forecast export.
+
+### Input
+
+Download and extract the original UCI Online Retail II workbook:
+
+https://archive.ics.uci.edu/dataset/502/online+retail+ii
+
+The expected input is:
+
+```text
+online_retail_II.xlsx
+```
+
+The script expects the original workbook structure and verifies the documented
+reversal pair. It is not a generic pipeline for arbitrary retail files.
+
+### Environment
+
+The verified development run used Python 3.13.18.
+
+In a separate training environment, install:
+
+```bash
+pip install -r requirements-training.txt
+```
+
+The dashboard and training requirements are intentionally separate.
+
+### Run
+
+From the repository root:
+
+```bash
+python train.py \
+  --input "/path/to/online_retail_II.xlsx" \
+  --output "training_outputs"
+```
+
+Replace `/path/to/online_retail_II.xlsx` with the actual workbook location.
+
+In Google Colab, the command can be executed from a code cell by prefixing it
+with `!` and using the workbook's Colab path.
+
+### Outputs
+
+The output directory contains:
+
+- `cleaning_summary.csv`
+- `selected_products.csv`
+- `split_row_counts.csv`
+- `metrics.csv`
+- `validation_predictions.csv`
+- `test_predictions.csv`
+- `historical_forecasts.csv`
+- `selected_model.joblib`
+- `run_metadata.json`
+
+The metadata records package versions, feature names, model parameters,
+date boundaries, and the input workbook's SHA-256 hash.
+
+### Verified reproduction
+
+The standalone script was run in a separate Python process and compared
+against the notebook-generated dashboard forecasts.
+
+- Matched product-date rows: 1,380.
+- Maximum absolute prediction difference: 0.0.
+- Validation and test metrics matched the recorded notebook results.
+
+This verifies reproduction in the recorded development environment.
+Identical results across different package versions or platforms are not guaranteed.
+
+The model configuration was fixed before this reproduction run.
+The repeated test calculations were used to verify implementation equivalence,
+not to select new hyperparameters.
+
+### Dashboard integration
+
+The dashboard reads:
+
+```text
+data/historical_forecasts.csv
+```
+
+Training outputs are written separately. Running `train.py` does not automatically
+replace the deployed forecast file.
+
+Any deliberate replacement should be reviewed and followed by the dashboard tests.
