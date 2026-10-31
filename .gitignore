@@ -1,0 +1,28 @@
+# Python and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local environments
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Raw and intermediate data
+data/raw/
+data/processed/
+
+# Generated training outputs
+artifacts/
+reproduction_run/
+training_outputs/
+*.joblib
+
+# Operating-system files
+.DS_Store
+Thumbs.db
