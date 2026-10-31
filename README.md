@@ -255,12 +255,14 @@ dashboard, not the full training environment.
 retail-demand-simulator/
 ├── app.py
 ├── requirements.txt
+├── requirements-dev.txt
 ├── README.md
+├── retail_demand_simulator.ipynb
 ├── data/
 │   ├── README.md
 │   └── historical_forecasts.csv
-└── notebooks/
-    └── retail_demand_simulator.ipynb
+└── tests/
+    └── test_dashboard.py
 ```
 
 ## Limitations
@@ -282,7 +284,8 @@ retail-demand-simulator/
 ## Future work
 
 - Separate training and cleaning into reusable scripts.
-- Add automated regression and data-validation tests.
+- Expand automated tests to cover the training pipeline, invalid inputs,
+and additional interface behavior.
 - Introduce product-specific inventory inputs.
 - Evaluate rolling-origin backtests across multiple periods.
 - Investigate quantile forecasts and asymmetric shortage costs.
@@ -297,3 +300,28 @@ while remaining insufficient as an autonomous inventory-planning system.
 The contribution is a transparent workflow connecting data-quality investigation,
 chronological evaluation, and explicit operational assumptions. It is not a claim that
 point forecasts alone solve resource allocation.
+
+## Automated tests
+
+The repository includes eight dashboard test cases using pytest and
+Streamlit AppTest.
+
+The tests check:
+- Forecast CSV columns, missing values, product coverage, and date boundaries.
+- Successful application execution.
+- Displayed scenario arithmetic at −100%, 0%, +20%, and +40% demand.
+- Increasing demand does not reduce projected shortages.
+- Increasing stock does not increase projected shortages.
+
+Install the development dependencies and run from the repository root:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/test_dashboard.py -q
+```
+
+The current test suite passed all eight cases in the development environment.
+
+These tests validate dashboard behavior, not forecasting accuracy.
+They do not constitute a comprehensive security, accessibility, or browser-compatibility audit.
+Forecast accuracy is reported separately using the chronological evaluation.
